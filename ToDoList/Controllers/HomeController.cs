@@ -11,6 +11,11 @@ namespace ToDoList.Controllers
 
         public ViewResult Index(string id)
         {
+            //ToDoViewModel model = new ToDoViewModel();
+            //var filters = new Filters(id);
+            //model.Filters = new Filters(id);
+            //model.Categories = context.Categories.ToList();
+            //model.Statuses = context.Statuses.ToList();
             // load current filters and data needed for filter drop downs in ToDoViewModel
             var model = new ToDoViewModel
             {
@@ -19,24 +24,24 @@ namespace ToDoList.Controllers
                 Statuses = context.Statuses.ToList(),
                 DueFilters = Filters.DueFilterValues
             };
-            //var filters = new Filters(id);
+            var filters = new Filters(id); //???
             // get open tasks from database based on current filters
             IQueryable<ToDo> query = context.ToDos
                 .Include(t => t.Category).Include(t => t.Status);
 
-            if (model.Filters.HasCategory) {
+            if (filters.HasCategory) {
                 query = query.Where(t => t.CategoryId == model.Filters.CategoryId);
             }
-            if (model.Filters.HasStatus) {
+            if (filters.HasStatus) {
                 query = query.Where(t => t.StatusId == model.Filters.StatusId);
             }
-            if (model.Filters.HasDue) {
+            if (filters.HasDue) {
                 var today = DateTime.Today;
-                if (model.Filters.IsPast)
+                if (filters.IsPast)
                     query = query.Where(t => t.DueDate < today);
-                else if (model.Filters.IsFuture)
+                else if (filters.IsFuture)
                     query = query.Where(t => t.DueDate > today);
-                else if (model.Filters.IsToday)
+                else if (filters.IsToday)
                     query = query.Where(t => t.DueDate == today);
             }
             var tasks = query.OrderBy(t => t.DueDate).ToList();
